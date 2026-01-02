@@ -1,0 +1,25 @@
+from airflow import DAG 
+from airflow.operators.python_operator import PythonOperator 
+from datetime import datetime 
+from functions import execute_sql_script    
+
+OWNER = "{{ OWNER }}" #обеспечивает уникальность дагов по ученикам для деплоя
+
+with DAG(
+          dag_id=f'exapmle_core_customer_dag_{OWNER}', #меняет название дага до _dag
+          start_date = datetime(2024, 4, 21),
+          schedule_interval='0 6 * * *', #меняем расписание запуска дага
+          catchup=False,
+          tags=[OWNER],
+          default_args={
+                    "owner": OWNER
+          }
+) as dag:
+
+          core_customer = PythonOperator( #меняем название задачи
+                  task_id = 'core_customer', #меняем название задачи
+                  python_callable=execute_sql_script,
+                  op_kwargs={'file_path': f'/opt/airflow/dags/{OWNER}/dags/sql/customers'} #меняем название sql скрипта
+          )
+
+core_customer #меняем название задачи
